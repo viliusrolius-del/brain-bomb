@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Žinių karalystė</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101d2b;color:#f4f7ff;font-family:Arial,sans-serif}
+header{background:#172e43;padding:17px;text-align:center;border-bottom:3px solid #28c6bd}
+h1{margin:0;color:#63e3d5;font-size:27px}
+header p{margin:6px 0 0;color:#b9cbd8}
+.stats{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:12px}
+.stat,.panel{background:#203b50;border:1px solid #376078;border-radius:14px;padding:12px}
+nav{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;padding:10px}
+button,select{background:#167e83;color:white;border:0;border-radius:10px;padding:11px 15px;font-size:15px;cursor:pointer}
+button:hover{background:#20aaa4}
+button:disabled{opacity:.5;cursor:not-allowed}
+main{max-width:1050px;margin:auto;padding:12px}
+h2{color:#66e4d5}
+.screen{display:none}
+.screen.active{display:block}
+.map{
+ position:relative;min-height:510px;overflow:hidden;border:4px solid #bd9857;
+ border-radius:22px;background:
+ radial-gradient(ellipse at 20% 20%,#4b9563 0 15%,transparent 16%),
+ radial-gradient(ellipse at 75% 22%,#3d8559 0 17%,transparent 18%),
+ radial-gradient(ellipse at 48% 75%,#4c945d 0 22%,transparent 23%),
+ radial-gradient(ellipse at 15% 85%,#367c53 0 17%,transparent 18%),
+ linear-gradient(145deg,#277e78,#235b66 50%,#347c5b);
+}
+.map:before{content:"";position:absolute;inset:0;opacity:.22;background-image:radial-gradient(#e4d38c 2px,transparent 2px);background-size:28px 28px}
+.river{position:absolute;width:130%;height:65px;top:48%;left:-10%;background:#319fc0;transform:rotate(-19deg);border:7px solid #80d5dc;border-left:0;border-right:0;border-radius:50%}
+.road{position:absolute;width:120%;height:20px;top:52%;left:-10%;background:#b99b65;transform:rotate(20deg);border:3px dashed #e8d3a1}
+.place{position:absolute;z-index:2;min-width:105px;background:#203b50;border:2px solid #f2ca75;border-radius:15px;padding:10px 6px;text-align:center;box-shadow:0 5px 12px #10202a}
+.place span{display:block;font-size:29px;margin-bottom:4px}
+.place small{font-size:12px}
+.p1{left:7%;top:10%}.p2{right:7%;top:10%}.p3{left:37%;top:38%}.p4{left:8%;bottom:9%}.p5{right:8%;bottom:9%}.p6{right:39%;top:7%}
+.panel{margin:12px 0}
+.question{font-size:19px;line-height:1.6;margin:15px 0}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.answers button{background:#31546a;text-align:left}
+.answers button:hover{background:#167e83}
+.feedback{font-weight:bold;min-height:28px;margin-top:12px}
+input,select{max-width:100%;margin:5px}
+.item{display:inline-block;margin:6px;padding:12px;background:#294a60;border-radius:12px}
+footer{text-align:center;color:#9fb5c3;padding:25px}
+@media(max-width:550px){.map{min-height:560px}.place{min-width:90px;padding:7px 3px}.p3{left:34%}.answers{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>⚔️ ŽINIŲ KARALYSTĖ ⚔️</h1>
+<p>Mokykis, tyrinėk, laimėk ir kurk savo pasaulį!</p>
+</header>
+
+<div class="stats">
+ <div class="stat">⭐ Taškai: <b id="points">0</b></div>
+ <div class="stat">🪙 Monetos: <b id="coins">0</b></div>
+ <div class="stat">🏆 Pasiekimai: <b id="achievements">0</b></div>
+</div>
+
+<nav>
+<button onclick="show('world')">🗺️ Žemėlapis</button>
+<button onclick="show('math')">🔢 Matematika</button>
+<button onclick="show('lit')">📚 Lietuvių</button>
+<button onclick="show('shop')">🛒 Parduotuvė</button>
+<button onclick="show('home')">🏠 Namai</button>
+<button onclick="show('profile')">👤 Profilis</button>
+</nav>
+
+<main>
+<section id="world" class="screen active">
+<h2>🗺️ Karalystės žemėlapis</h2>
+<p>Pasirink vietovę ir pradėk nuotykį!</p>
+<div class="map">
+<div class="river"></div><div class="road"></div>
+<button class="place p1" onclick="show('math')"><span>🏰</span>Matematikos<br><small>pilis</small></button>
+<button class="place p2" onclick="show('lit')"><span>📚</span>Išminties<br><small>biblioteka</small></button>
+<button class="place p3" onclick="show('challenge')"><span>⚔️</span>Iššūkių<br><small>arena</small></button>
+<button class="place p4" onclick="show('home')"><span>🏠</span>Tavo<br><small>namai</small></button>
+<button class="place p5" onclick="show('shop')"><span>🛒</span>Prekybos<br><small>miestas</small></button>
+<button class="place p6" onclick="show('profile')"><span>🏆</span>Didvyrių<br><small>bokštas</small></button>
+</div>
+</section>
+
+<section id="math" class="screen panel">
+<h2>🔢 Matematikos pilis</h2>
+<label>Pasirink klasę:
+<select id="mathGrade">
+<option value="1">1 klasė</option><option value="2">2 klasė</option>
+<option value="3">3 klasė</option><option value="4">4 klasė</option>
+<option value="5">5 klasė</option><option value="6">6 klasė</option>
+<option value="7" selected>7 klasė</option><option value="8">8 klasė</option>
+<option value="9">9 klasė</option><option value="10">10 klasė</option>
+<option value="11">11 klasė</option><option value="12">12 klasė</option>
+</select></label>
+<div id="mathQuestion" class="question">Pasirink klasę ir spausk „Nauja užduotis“.</div>
+<div id="mathAnswers" class="answers"></div>
+<div id="mathFeedback" class="feedback"></div>
+<button onclick="newMath()">Nauja užduotis</button>
+</section>
+
+<section id="lit" class="screen panel">
+<h2>📚 Išminties biblioteka</h2>
+<label>Pasirink klasę:
+<select id="litGrade">
+<option value="1">1 klasė</option><option value="2">2 klasė</option>
+<option value="3">3 klasė</option><option value="4">4 klasė</option>
+<option value="5">5 klasė</option><option value="6">6 klasė</option>
+<option value="7" selected>7 klasė</option><option value="8">8 klasė</option>
+<option value="9">9 klasė</option><option value="10">10 klasė</option>
+<option value="11">11 klasė</option><option value="12">12 klasė</option>
+</select></label>
+<div id="litQuestion" class="question">Pasirink klasę ir spausk „Nauja užduotis“.</div>
+<div id="litAnswers" class="answers"></div>
+<div id="litFeedback" class="feedback"></div>
+<button onclick="newLit()">Nauja užduotis</button>
+</section>
+
+<section id="challenge" class="screen panel">
+<h2>⚔️ Iššūkių arena</h2>
+<p>Čia laukia sunkesni klausimai. Teisingas atsakymas vertas papildomų taškų!</p>
+<button onclick="show('math');newMath()">Pradėti matematikos iššūkį</button>
+<button onclick="show('lit');newLit()">Pradėti lietuvių kalbos iššūkį</button>
+</section>
+
+<section id="shop" class="screen panel">
+<h2>🛒 Karalystės parduotuvė</h2>
+<p>Uždirbk monetų ir papuošk savo namus.</p>
+<div id="shopItems"></div>
+</section>
+
+<section id="home" class="screen panel">
+<h2>🏠 Tavo namai</h2>
+<p>Čia gali laikyti savo nupirktus daiktus.</p>
+<div style="background:#a47b50;padding:15px;border:8px solid #d6b77b;border-radius:12px;min-height:230px">
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+<div class="item">🪟</div><div class="item">🪴</div><div class="item">🪑</div><div class="item">🕯️</div>
+<div class="item">🟫</div><div class="item">🟫</div><div class="item">🟫</div><div class="item">🟫</div>
+</div></div>
+<h3>Tavo daiktai:</h3><div id="inventory">Kol kas nieko nenusipirkai.</div>
+</section>
+
+<section id="profile" class="screen panel">
+<h2>👤 Žaidėjo profilis</h2>
+<p>Nuotykių ieškotojas: <b id="playerName">Didvyris</b></p>
+<p>Surinkti taškai: <b id="profilePoints">0</b></p>
+<p>Monetos: <b id="profileCoins">0</b></p>
+<p>Pasiekimai: <b id="profileAchievements">0</b></p>
+<p>Įrašyk savo vardą:</p>
+<input id="nameInput" placeholder="Tavo vardas">
+<button onclick="saveName()">Išsaugoti</button>
+<h3>🏆 Pasiekimai</h3><div id="badges">Dar nėra pasiekimų.</div>
+</section>
+</main>
+<footer>Žinių karalystė © 2026 | Tavo nuotykių pasaulis</footer>
+
+<script>
+let data=JSON.parse(localStorage.getItem("zkSave")||'{"points":0,"coins":0,"carry":0,"wins":0,"inventory":[],"name":"Didvyris","badges":[]}');
+function save(){localStorage.setItem("zkSave",JSON.stringify(data));update()}
+function update(){
+ document.getElementById("points").textContent=data.points;
+ document.getElementById("coins").textContent=data.coins;
+ document.getElementById("achievements").textContent=data.badges.length;
+ document.getElementById("profilePoints").textContent=data.points;
+ document.getElementById("profileCoins").textContent=data.coins;
+ document.getElementById("profileAchievements").textContent=data.badges.length;
+ document.getElementById("playerName").textContent=data.name;
+ document.getElementById("badges").textContent=data.badges.join(" · ")||"Dar nėra pasiekimų.";
+ document.getElementById("inventory").textContent=data.inventory.join(" · ")||"Kol kas nieko nenusipirkai.";
+}
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")}
+function reward(grade){
+ let p=grade<=2?0:grade<=4?1:grade<=6?2:grade<=8?4:grade<=10?7:10;
+ data.points+=p;data.carry+=p;
+ let earned=Math.floor(data.carry/4);
+ data.coins+=earned;data.carry%=4;data.wins++;
+ if(data.wins===1)data.badges.push("🌟 Pirmasis žingsnis");
+ if(data.wins===10)data.badges.push("🔥 Dešimt pergalių");
+ if(data.points>=50&&!data.badges.includes("💎 Taškų rinkėjas"))data.badges.push("💎 Taškų rinkėjas");
+ save();
+ return p;
+}
+function choices(correct){
+ let arr=[correct];
+ while(arr.length<4){
+  let n=correct+Math.floor(Math.random()*13)-6;
+  if(n!==correct&&!arr.includes(n))arr.push(n);
+ }
+ return arr.sort(()=>Math.random()-.5);
+}
+let currentMath=null;
+function newMath(){
+ let g=+document.getElementById("mathGrade").value,a,b,x,question,answer;
+ if(g<=2){a=Math.floor(Math.random()*20)+1;b=Math.floor(Math.random()*20)+1;answer=a+b;question=`Kiek bus ${a} + ${b}?`}
+ else if(g<=4){a=Math.floor(Math.random()*80)+10;b=Math.floor(Math.random()*30)+5;answer=a-b;question=`Apskaičiuok: ${a} − ${b}.`}
+ else if(g<=6){a=Math.floor(Math.random()*12)+3;b=Math.floor(Math.random()*12)+3;answer=a*b;question=`Apskaičiuok: ${a} × ${b}.`}
+ else if(g===7){x=Math.floor(Math.random()*9)+2;a=2+Math.floor(Math.random()*4);b=1+Math.floor(Math.random()*5);let c=1+Math.floor(Math.random()*4);let d=a*(2*x-3)-b*(x+4)+c*x;answer=x;question=`Išspręsk lygtį: ${a}(2x − 3) − ${b}(x + 4) + ${c}x = ${d}.`}
+ else if(g===8){x=Math.floor(Math.random()*8)+2;a=(Math.floor(Math.random()*4)+2)*10;answer=x;question=`Prekė kainavo ${a} €. Jai pritaikyta ${Math.round(100/x)}% nuolaida. Kokia buvo nuolaidos dalis nuo pradinės kainos? Pasirink x = ${x} tik jei nuolaida būtų 1/${x}.`}
+ else if(g===9){x=Math.floor(Math.random()*7)+2;a=1+Math.floor(Math.random()*5);b=1+Math.floor(Math.random()*5);let c=a*x+b;answer=x;question=`Išspręsk: ${a}x + ${b} = ${c}.`}
+ else if(g===10){x=Math.floor(Math.random()*7)+2;a=1+Math.floor(Math.random()*4);answer=x;question=`Lygties x² − ${2*x}x + ${x*x- a} = −${a} šaknys? Kuri iš jų didesnė?`}
+ else if(g===11){x=Math.floor(Math.random()*5)+2;answer=x;question=`Geometrinės progresijos pirmasis narys 3, vardiklis ${x}. Koks antrasis narys?`;answer=3*x}
+ else {x=Math.floor(Math.random()*8)+2;answer=x;question=`Jei f(x)=x²−4x+3, kokia yra f(${x})?`;answer=x*x-4*x+3}
+ currentMath={answer,grade:g};
+ document.getElementById("mathQuestion").textContent=question;
+ let opts=choices(answer);
+ document.getElementById("mathAnswers").innerHTML="";
+ opts.forEach(v=>{let btn=document.createElement("button");btn.textContent=v;btn.onclick=()=>checkMath(v);document.getElementById("mathAnswers").appendChild(btn)});
+ document.getElementById("mathFeedback").textContent="";
+}
+function checkMath(v){
+ if(!currentMath)return;
+ let f=document.getElementById("mathFeedback");
+ if(v===currentMath.answer){let p=reward(currentMath.grade);f.textContent=`Teisingai! +${p} taškų!`;currentMath=null}
+ else f.textContent="Dar ne! Pabandyk dar kartą.";
+}
+const lit=[
+{g:1,q:"Kuri raidė yra žodyje „saulė“ pirma?",a:"s",o:["s","m","t","k"]},
+{g:2,q:"Kuris žodis yra daiktavardis?",a:"medis",o:["bėga","medis","gražus","greitai"]},
+{g:3,q:"Kuris žodis yra būdvardis?",a:"žalias",o:["namas","žalias","bėgti","vakar"]},
+{g:4,q:"Kuriame sakinyje yra klausiamasis sakinys?",a:"Kur tu eini?",o:["Aš einu namo.","Kur tu eini?","Eik namo.","Kaip gražu!"]},
+{g:5,q:"Kuri kalbos dalis atsako į klausimą „ką veikia?“",a:"Veiksmažodis",o:["Daiktavardis","Veiksmažodis","Būdvardis","Skaitvardis"]},
+{g:6,q:"Kuris žodis yra prieveiksmis?",a:"greitai",o:["greitas","greitai","greitis","greitumas"]},
+{g:7,q:"Kuriame sakinyje taisyklingai atskirtas šalutinis laiko dėmuo?",a:"Kai išaušo, išėjome į kelią.",o:["Kai išaušo, išėjome į kelią.","Kai, išaušo išėjome į kelią.","Kai išaušo išėjome, į kelią.","Kai išaušo išėjome į kelią."]},
+{g:7,q:"Kokio tipo šalutinis sakinys yra: „Žinau, kad jis sugrįš“?",a:"Papildinio",o:["Laiko","Priežasties","Papildinio","Sąlygos"]},
+{g:7,q:"Kuriame sakinyje šalutinis priežasties dėmuo?",a:"Likome namie, nes smarkiai lijo.",o:["Likome namie, nes smarkiai lijo.","Kai lietus liovėsi, išėjome.","Jei lis, liksime namie.","Nors lijo, išėjome."]},
+{g:8,q:"Kuris sakinys yra sudėtinis prijungiamasis?",a:"Skubėjau, nes vėlavau.",o:["Skubėjau, nes vėlavau.","Skubėjau ir vėlavau.","Skubėjau, vėlavau.","Skubėjau!"]},
+{g:9,q:"Kas yra metafora?",a:"Perkeltinės reikšmės pasakymas",o:["Tiesioginis palyginimas","Perkeltinės reikšmės pasakymas","Rimo rūšis","Veiksmo laikas"]},
+{g:10,q:"Kas yra lyrinis subjektas?",a:"Kalbantysis literatūros kūrinyje",o:["Visada pats autorius","Kalbantysis literatūros kūrinyje","Kūrinio leidėjas","Skaitytojas"]},
+{g:11,q:"Kas yra simbolis literatūroje?",a:"Vaizdas, turintis gilesnę prasmę",o:["Tik tikras daiktas","Vaizdas, turintis gilesnę prasmę","Rimo pora","Skyrybos ženklas"]},
+{g:12,q:"Koks paradokso bruožas?",a:"Iš pirmo žvilgsnio prieštaringa mintis",o:["Tiksli data","Iš pirmo žvilgsnio prieštaringa mintis","Vien tik rimas","Pasakojimas pirmuoju asmeniu"]}
+];
+const extraLit=[
+{g:7,q:"Perskaityk: „Vėjas beldėsi į langus, lyg prašytų įleisti.“ Kokia raiškos priemonė vartojama?",a:"Personifikacija",o:["Hiperbolė","Personifikacija","Ironija","Antitezė"]},
+{g:8,q:"Kuris jungtukas dažniausiai įveda nuolaidos šalutinį sakinį?",a:"nors",o:["nes","kad","nors","kai"]},
+{g:9,q:"Ką sakinyje „Matau, kaip tolumoje temsta dangus“ įveda žodis „kaip“?",a:"Šalutinį dėmens turinio sakinį",o:["Vienarūšes sakinio dalis","Šalutinį dėmens turinio sakinį","Pažyminį","Įterpinį"]},
+{g:10,q:"Kuo skiriasi autorius ir lyrinis subjektas?",a:"Lyrinis subjektas yra kūrinio kalbantysis, nebūtinai autorius",o:["Nesiskiria","Lyrinis subjektas yra kūrinio kalbantysis, nebūtinai autorius","Autorius visada išgalvotas","Lyrinis subjektas yra skaitytojas"]},
+{g:11,q:"Kuriame sakinyje yra šalutinis sąlygos dėmuo?",a:"Jeigu suspėsiu, ateisiu.",o:["Kadangi lyja, liksiu.","Jeigu suspėsiu, ateisiu.","Nors pavargau, dirbu.","Kai grįšiu, paskambinsiu."]},
+{g:12,q:"Kas yra intertekstualumas?",a:"Vieno kūrinio sąsajos su kitais tekstais",o:["Teksto ilgis","Vieno kūrinio sąsajos su kitais tekstais","Veikėjų skaičius","Ritmo greitis"]}
+];
+let currentLit=null;
+function newLit(){
+ let g=+document.getElementById("litGrade").value;
+ let pool=lit.concat(extraLit).filter(q=>q.g===g);
+ if(g>=7)pool=pool.concat([
+ {g,q:"Perskaityk tekstą: „Naktis užklojo laukus, o vienišas žiburys saugojo kelią namo.“ Kokia nuotaika kuriama?",a:"Rami, šiek tiek melancholiška",o:["Linksma ir komiška","Rami, šiek tiek melancholiška","Grėsminga ir pikta","Visiškai neutrali"]},
+ {g,q:"Kuriame sakinyje taisyklingai pavartotas kablelis?",a:"Žmogus, kuris skaito, plečia savo pasaulį.",o:["Žmogus kuris skaito plečia, savo pasaulį.","Žmogus, kuris skaito, plečia savo pasaulį.","Žmogus kuris, skaito, plečia savo pasaulį.","Žmogus, kuris skaito plečia savo pasaulį."]}
+ ]);
+ let q=pool[Math.floor(Math.random()*pool.length)];
+ currentLit={answer:q.a,grade:g};
+ document.getElementById("litQuestion").textContent=q.q;
+ let opts=q.o.slice().sort(()=>Math.random()-.5);
+ let box=document.getElementById("litAnswers");box.innerHTML="";
+ opts.forEach(v=>{let btn=document.createElement("button");btn.textContent=v;btn.onclick=()=>checkLit(v);box.appendChild(btn)});
+ document.getElementById("litFeedback").textContent="";
+}
+function checkLit(v){
+ if(!currentLit)return;
+ let f=document.getElementById("litFeedback");
+ if(v===currentLit.answer){let p=reward(currentLit.grade);f.textContent=`Puiku! Teisingai! +${p} taškų!`;currentLit=null}
+ else f.textContent="Ne visai. Perskaityk klausimą dar kartą.";
+}
+const goods=[["🪴","Augalas",8],["🪑","Medinė kėdė",16],["🗡️","Dekoratyvinis kardas",35],["💎","Brangakmenis",60],["👑","Karališka karūna",120],["🐉","Drakono statulėlė",200]];
+function renderShop(){
+ let box=document.getElementById("shopItems");box.innerHTML="";
+ goods.forEach((it,i)=>{let d=document.createElement("div");d.className="item";let b=document.createElement("button");b.textContent="Pirkti";b.onclick=()=>buy(i);d.append(`${it[0]} ${it[1]} — ${it[2]} 🪙 `);d.appendChild(b);box.appendChild(d)});
+}
+function buy(i){
+ let it=goods[i];
+ if(data.coins<it[2]){alert("Dar neturi pakankamai monetų!");return}
+ data.coins-=it[2];data.inventory.push(it[0]+" "+it[1]);save();alert("Nupirkta! Daiktas atsirado tavo namuose.");
+}
+function saveName(){let n=document.getElementById("nameInput").value.trim();if(n){data.name=n;save()}}
+renderShop();update();
+</script>
+</body>
+</html>
